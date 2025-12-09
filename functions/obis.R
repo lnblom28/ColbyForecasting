@@ -1,12 +1,21 @@
 
+
+standard_obis_fields = function(){
+  #' Retrieve a vector of standard OBIS fields
+  #' 
+  #' @return character vector of names
+  fields = c("id",
+             "basisOfRecord",
+             "eventDate",
+             "eventTime",
+             "individualCount",
+             "decimalLongitude",
+             "decimalLatitude")
+  return(fields)
+}
+
 tidy_obis = function(x = fetch_obis(),
-                    fields = c("id",
-                       "basisOfRecord",
-                       "eventDate",
-                       "eventTime",
-                       "individualCount",
-                       "decimalLongitude",
-                       "decimalLatitude"),
+                    fields = standard_obis_fields(),
                     crs = 4326){
   
   #' Tidy raw OBIS results and return as an sf object
@@ -20,7 +29,8 @@ tidy_obis = function(x = fetch_obis(),
   cnames = colnames(x)
   if ("eventDate" %in% cnames) {
     dates = substring(x$eventDate, 1,10) |> as.Date()
-    x = dplyr::mutate(x, eventDate = dates,
+    x = dplyr::mutate(x, 
+                      eventDate = dates,
                       year = suppressWarnings(as.numeric(format(eventDate, "%Y"))),
                       month = suppressWarnings(format(eventDate, "%b")) |>
                         factor(levels = month.abb),
@@ -39,13 +49,8 @@ tidy_obis = function(x = fetch_obis(),
 
 fetch_obis = function(scientificname = "Mola mola",
                       bb = colby_bbox(),
-                      fields = c("id",
-                                 "basisOfRecord",
-                                 "eventDate",
-                                 "eventTime",
-                                 "individualCount",
-                                 "decimalLongitude",
-                                 "decimalLatitude"),
+                      fields = standard_obis_fields(),
+                      tidy = TRUE,
                       output_path = data_path("obis") |> make_path(),
                       crs = 4326){
   
@@ -56,6 +61,7 @@ fetch_obis = function(scientificname = "Mola mola",
   #'   extracted.  Used to filter the request to a smaller-than-global scope.
   #'   The output oc `colby_bbox()` will do nicely.
   #' @param fields chr one or more fields to retrieve
+  #' @param tidy logical, if TRUE tidy up the downloaded data
   #' @param output_path chr, the destination path where the data are stored using 
   #'  Files are automatically named "genus_species.gpkg" or "genus.gpkg" as
   #'  appropriate for each request.
@@ -74,8 +80,8 @@ fetch_obis = function(scientificname = "Mola mola",
               function(species){
                 x = robis::occurrence(scientificname = species,
                                      geometry = geometry,
-                                     fields = fields) |>
-                  tidy_obis(fields = fields, crs = crs)
+                                     fields = fields)
+                if (tidy) x = tidy_obis(x, fields = fields, crs = crs)
                 sf::write_sf(x, 
                              file.path(output_path, 
                                        sprintf("%s.gpkg", gsub(" ", "_", species, fixed = TRUE))))

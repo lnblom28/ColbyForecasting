@@ -76,7 +76,7 @@ occurrence = obs |>
   browse_obis()
 ```
 
-Next let's think about what our minimum requirements might be in oirder to build a model. To answer that we need to think about our environmental covariates in the Brickman data](https://github.com/BigelowLab/ColbyForecasting/wiki/Brickman). That data has dimensions of x (longitude), y (latitude) and month.  In order to match obseravtions with that data, our observations must be complete in those three variables.  Let's take a look at a summary of the observations which will indicate the number of elements missing in each variable.
+Next let's think about what our minimum requirements might be in order to build a model. To answer that we need to think about our environmental covariates in the Brickman data](https://github.com/BigelowLab/ColbyForecasting/wiki/Brickman). That data has dimensions of x (longitude), y (latitude) and month.  In order to match obseravtions with that data, our observations must be complete in those three variables.  Let's take a look at a summary of the observations which will indicate the number of elements missing in each variable.
 
 ```{r summary_obs}
 summary(obs)
@@ -103,7 +103,7 @@ obs |>
   browse_obis()
 ```
 
-Eeek!  It's a carcass that washed up on shore!  We checked a number of others, and they are all carcasses.  Is that a presence?  Is that what we model are modeling?  If not then we should filter those out.
+What you find is, of course, dependent upon the species you have selected and any prior filtering steps you may have taken. Some may find that the observation is of a carcass, or possibly a keyboard entry error.  How does one know without investigating each record.  It quickly turns into a data quality investigation which can take a lot of time, but may be the most important step you take.  In the interest of time for the class, we'll simply filter those out of our observation dataset.
 
 ```{r obs_filter_countless_dead}
 obs = obs |>
@@ -119,7 +119,9 @@ obs |>
   browse_obis()
 ```
 
-OK, that seems legitmate. And it is possible, *Mola mola* can congregate for feeding, mating and possibly for karaoke parties.
+OK, that seems like a legitimate source, and nd it is possible, *Mola mola* can congregate for feeding, mating and possibly for karaoke parties. 
+
+
 
 ## `year`
 
@@ -153,7 +155,7 @@ ggplot(data = obs,
   labs(title = "Counts per month")
 ```
 
-Oh, rats!  By default `ggplot` plots in alpha-numeric order, which scrambles our month order.  To fix that we have to convert the `month` in a factor type while specifying the order of the factors, and we'll use the `mutate()` function to help us.
+Oh, rats!  By default `ggplot` plots in alpha-numeric order, which scrambles our month order.  To fix that we have to convert the `month` in a factor type while specifying the order of the factors, and we'll use the `mutate()` function to help us. You can learn more about factors in this [blog post](https://bigelowlab.github.io/tandy-blog/posts/2024-09-30_factor_foo/)
 
 ```{r month_ordered}
 obs = obs |>
@@ -186,7 +188,7 @@ Let's see what our mask looks like with the observations drizzled on top. Becaus
 plot(mask, breaks = "equal", axes = TRUE, reset = FALSE)
 plot(st_geometry(obs), pch = ".", add = TRUE)
 ```
-Maybe with proper with squinting we can see some that faal into no-data areas.  The sure-fire way to tell is to extract the mask values at the point locations.
+Maybe with proper with squinting we can see some that fall into no-data areas.  The sure-fire way to tell is to extract the mask values at the point locations.
 
 ```{r mask_extract}
 hitOrMiss = extract_brickman(mask, obs)
@@ -198,9 +200,10 @@ OK, let's tally the "value" variable.
 ```{r tally_masked}
 count(hitOrMiss, value)
 ```
-Ooooo, 33 records in `obs` don't line up with values in the mask (or in any Brickman data).  We should filter those out; we'll do so with a `filter()`. Note that we a "reaching" into the `hitOrMiss` table to access the `value` column when we use this `hitOrMiss$value`.  Let's figure out how many records we have dropped with all of this filtering.
+Ooooo, a number of records in `obs` don't line up with values in the mask (or in any Brickman data).  We should filter those out; we'll do so with a `filter()`. Note that we are reaching into the `hitOrMiss` table to access the `value` column when we use this `hitOrMiss$value`.  Let's figure out how many records we have dropped with all of this filtering.
 
 ```{r filter_the_misses}
+dim_start = dim(obs)
 obs = obs |>
   filter(!is.na(hitOrMiss$value))
 dim_end = dim(obs)

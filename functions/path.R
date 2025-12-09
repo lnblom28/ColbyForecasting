@@ -55,7 +55,7 @@ personal_data_path = function(user = get_user(),
 }
 
 
-data_path = function(..., root = personal_data_path()){
+data_path = function(...,  root = ROOT_DATA_PATH){
   
   #' Get the data path
   #' 
@@ -90,9 +90,7 @@ coastline_path = function(root = ROOT_DATA_PATH){
   file.path(root, "coastline")
 }
 
-
-
-obis_path = function(root = personal_data_path()){
+obis_path = function(root = ROOT_DATA_PATH){
   
   #' Retrieve the path to the obis data
   #' 

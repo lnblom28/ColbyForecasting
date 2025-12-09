@@ -109,7 +109,7 @@ db
 
 If you are wondering about filtering a table, be sure to [check out the wiki on tabular data](https://github.com/BigelowLab/ColbyForecasting/wiki/tables) to get started.
 
-You might be wondering what that `|>` is doing. It is called a pipe, and it delivers the output of one function to the next function as the first parameter (aka argument). For example, `brickman_database()` produces a table, that table is immediately passed into `filter()` to choose rows that match our criteria.   
+You might be wondering what that `|>` is doing. It is called a **pipe**, and it delivers the output of one function to the next function as the first parameter (aka argument). For example, `brickman_database()` produces a table, that table is immediately passed into `filter()` to choose rows that match our criteria.   
 
 Now that we have the database listing just the records we want, we pass it to the `read_brickman()` function.
 

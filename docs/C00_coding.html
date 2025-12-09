@@ -345,7 +345,7 @@ Note
         x = sf::st_as_sf(x, coords = c("lon", "lat"), crs = 4326)
     x
 }
-&lt;bytecode: 0x557486f054d0&gt;</code></pre>
+&lt;bytecode: 0x559e24aa4768&gt;</code></pre>
 </div>
 </div>
 <p>If that still doesn’t work, we highly recommend trying <a href="https://rseek.org/">Rseek.org</a> which is an R-language specific search engine.</p>
@@ -434,7 +434,7 @@ Geodetic CRS:  WGS 84
 </div>
 </div>
 <p>If you are wondering about filtering a table, be sure to <a href="https://github.com/BigelowLab/ColbyForecasting/wiki/tables">check out the wiki on tabular data</a> to get started.</p>
-<p>You might be wondering what that <code>|&gt;</code> is doing. It is called a pipe, and it delivers the output of one function to the next function as the first parameter (aka argument). For example, <code>brickman_database()</code> produces a table, that table is immediately passed into <code>filter()</code> to choose rows that match our criteria.</p>
+<p>You might be wondering what that <code>|&gt;</code> is doing. It is called a <strong>pipe</strong>, and it delivers the output of one function to the next function as the first parameter (aka argument). For example, <code>brickman_database()</code> produces a table, that table is immediately passed into <code>filter()</code> to choose rows that match our criteria.</p>
 <p>Now that we have the database listing just the records we want, we pass it to the <code>read_brickman()</code> function.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>current <span class="ot">=</span> <span class="fu">read_brickman</span>(db)</span>
