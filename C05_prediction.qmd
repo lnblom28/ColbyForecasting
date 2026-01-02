@@ -83,7 +83,7 @@ forecast_2075 = predict_stars(model_fits, covars_rcp85_2075)
 forecast_2075
 ```
 
-```{r plot_forecast}
+```{r plot_forecast, warning = FALSE}
 plot_prediction(forecast_2075['default_btree'])
 ```
 

@@ -340,10 +340,6 @@ month    1  12     NA       NA     NA    NA Jan,...,Dec    </code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>numeric</code></pre>
 </div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Coordinate system already present.
-ℹ Adding new coordinate system, which will replace the existing one.</code></pre>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -354,12 +350,8 @@ month    1  12     NA       NA     NA    NA Jan,...,Dec    </code></pre>
 </div>
 <p>We can also plot a presence/absence labeled map, but keep in mind it is just a thresholded version of the above where “presence” means <code>prediction &gt;= 0.5</code>. Of course, you can select other values to threshold the habitat suitablility scores.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pa_nowcast <span class="ot">=</span> <span class="fu">threshold_prediction</span>(nowcast)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_prediction</span>(pa_nowcast[<span class="st">'default_btree'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Coordinate system already present.
-ℹ Adding new coordinate system, which will replace the existing one.</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pa_nowcast <span class="ot">=</span> <span class="fu">threshold_prediction</span>(nowcast)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_prediction</span>(pa_nowcast[<span class="st">'default_btree'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -373,15 +365,15 @@ month    1  12     NA       NA     NA    NA Jan,...,Dec    </code></pre>
 <h2 data-number="4.2" class="anchored" data-anchor-id="forecast"><span class="header-section-number">4.2</span> Forecast</h2>
 <p>Now let’s try our hand at forecasting - let’s try RCP85 in 2075. First we load those parameters, then run the prediction and plot.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>covars_rcp85_2075 <span class="ot">=</span> <span class="fu">read_brickman</span>(db <span class="sc">|&gt;</span> <span class="fu">filter</span>(scenario <span class="sc">==</span> <span class="st">"RCP85"</span>, </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                                               year <span class="sc">==</span> <span class="dv">2075</span>, </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                               interval <span class="sc">==</span> <span class="st">"mon"</span>),</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">add =</span> <span class="fu">c</span>(<span class="st">"depth"</span>, <span class="st">"month"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(cfg<span class="sc">$</span>keep_vars))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>covars_rcp85_2075 <span class="ot">=</span> <span class="fu">read_brickman</span>(db <span class="sc">|&gt;</span> <span class="fu">filter</span>(scenario <span class="sc">==</span> <span class="st">"RCP85"</span>, </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                                               year <span class="sc">==</span> <span class="dv">2075</span>, </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                                               interval <span class="sc">==</span> <span class="st">"mon"</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">add =</span> <span class="fu">c</span>(<span class="st">"depth"</span>, <span class="st">"month"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(cfg<span class="sc">$</span>keep_vars))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>forecast_2075 <span class="ot">=</span> <span class="fu">predict_stars</span>(model_fits, covars_rcp85_2075)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>forecast_2075</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>forecast_2075 <span class="ot">=</span> <span class="fu">predict_stars</span>(model_fits, covars_rcp85_2075)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>forecast_2075</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>stars object with 3 dimensions and 4 attributes
 attribute(s):
@@ -403,13 +395,9 @@ month    1  12     NA       NA     NA    NA Jan,...,Dec    </code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_prediction</span>(forecast_2075[<span class="st">'default_btree'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_prediction</span>(forecast_2075[<span class="st">'default_btree'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>numeric</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Coordinate system already present.
-ℹ Adding new coordinate system, which will replace the existing one.</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -437,57 +425,19 @@ Note
 <h2 data-number="4.3" class="anchored" data-anchor-id="save-the-predictions"><span class="header-section-number">4.3</span> Save the predictions</h2>
 <p>It’s easy to save the predicitions (and read then back with <code>read_prediction()</code>).</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure the output directory exists</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>path <span class="ot">=</span> <span class="fu">make_path</span>(<span class="st">"predictions"</span>)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_prediction</span>(nowcast,</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scientificname =</span> cfg<span class="sc">$</span>scientificname,</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">version =</span> cfg<span class="sc">$</span>version,</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">year =</span> <span class="st">"CURRENT"</span>,</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scenario =</span> <span class="st">"CURRENT"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>stars object with 3 dimensions and 4 attributes
-attribute(s):
-                        Min.    1st Qu.    Median      Mean   3rd Qu.      Max.
-default_glm     3.867704e-01 0.86655976 0.9507036 0.9163638 0.9900936 0.9999984
-default_rf      0.000000e+00 0.07093254 0.2959609 0.3020550 0.4933744 0.9525368
-default_btree   4.532294e-04 0.11327315 0.1394918 0.1947402 0.1864907 0.9430976
-default_maxent  2.884269e-05 0.02453230 0.3647350 0.3833180 0.7155902 0.9999796
-                 NA's
-default_glm     59796
-default_rf      59796
-default_btree       0
-default_maxent  59796
-dimension(s):
-      from  to offset    delta refsys point      values x/y
-x        1 121 -74.93  0.08226 WGS 84 FALSE        NULL [x]
-y        1  89  46.08 -0.08226 WGS 84 FALSE        NULL [y]
-month    1  12     NA       NA     NA    NA Jan,...,Dec    </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_prediction</span>(forecast_2075,</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scientificname =</span> cfg<span class="sc">$</span>scientificname,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">version =</span> cfg<span class="sc">$</span>version,</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">year =</span> <span class="st">"2075"</span>,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scenario =</span> <span class="st">"RCP85"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>stars object with 3 dimensions and 4 attributes
-attribute(s):
-                        Min.    1st Qu.    Median      Mean   3rd Qu.      Max.
-default_glm     0.3553119500 0.85041691 0.9460110 0.9062116 0.9891528 0.9999988
-default_rf      0.0000000000 0.13669218 0.3855974 0.3367025 0.5037132 0.8953373
-default_btree   0.0005394912 0.13949181 0.1394918 0.1996763 0.2144095 0.9709268
-default_maxent  0.0001009045 0.07495376 0.4922678 0.4371176 0.7425307 0.9999970
-                 NA's
-default_glm     59796
-default_rf      59796
-default_btree       0
-default_maxent  59796
-dimension(s):
-      from  to offset    delta refsys point      values x/y
-x        1 121 -74.93  0.08226 WGS 84 FALSE        NULL [x]
-y        1  89  46.08 -0.08226 WGS 84 FALSE        NULL [y]
-month    1  12     NA       NA     NA    NA Jan,...,Dec    </code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure the output directory exists</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>path <span class="ot">=</span> <span class="fu">make_path</span>(<span class="st">"predictions"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_prediction</span>(nowcast,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scientificname =</span> cfg<span class="sc">$</span>scientificname,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">version =</span> cfg<span class="sc">$</span>version,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">year =</span> <span class="st">"CURRENT"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scenario =</span> <span class="st">"CURRENT"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="fu">write_prediction</span>(forecast_2075,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scientificname =</span> cfg<span class="sc">$</span>scientificname,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">version =</span> cfg<span class="sc">$</span>version,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">year =</span> <span class="st">"2075"</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>                 <span class="at">scenario =</span> <span class="st">"RCP85"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>

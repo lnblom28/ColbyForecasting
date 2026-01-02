@@ -135,14 +135,11 @@ plot_prediction = function(x,
       ggplot2::scale_fill_viridis_c(option = colors[1], 
                                     limits = c(0,1), 
                                     na.value = "grey50") + 
-      ggplot2::coord_sf(crs = sf::st_crs(x)) + 
       ggplot2::facet_wrap(~month)
   } else {
     gg = ggplot2::ggplot() +
       stars::geom_stars(data = x[1]) + 
-      #ggplot2::scale_fill_hue(na.value = "grey50") + 
       ggplot2::scale_fill_viridis_d() + 
-      ggplot2::coord_sf(crs = sf::st_crs(x)) + 
       ggplot2::facet_wrap(~month)
   }
   if (!is.null(coast)) {
@@ -170,7 +167,7 @@ write_prediction = function(x,
   #' @param year chr, one of CURRENT, 2055 or 2075
   #' @param scenario chr, one of CURRENT, RCP45 or RCP85
   #' @param path chr the data path
-  #' @return the input object x (suitable for piping)
+  #' @return the input object x invisibly (also suitable for piping)
   
   stopifnot(inherits(x, "stars"))
   path = make_path(path)
@@ -181,7 +178,7 @@ write_prediction = function(x,
                      year[1],
                      scenario[1])
   saveRDS(x, file.path(path, filename))
-  x
+  invisible(x)
 }
 
 
