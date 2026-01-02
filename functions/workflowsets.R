@@ -222,7 +222,7 @@ model_fit_vi = function(x,
   #' Compute variable importance
   #' 
   #' @param x table of model fits
-  #' @param id str the id of the workflow to plot (wflow_id)
+  #' @param wids str the id of the workflow to plot (wflow_id)
   #' @param scale logical, if TRUE scale values 0-1 by model fit
   #' @param ... other arguments for the [vip::vi] function
   #' @return a table if variable importance values
@@ -287,6 +287,122 @@ model_fit_vip = function(x, ...){
   
   
 }
+
+
+model_fit_varimp_plot = function(x,
+                                 wids = dplyr::pull(x, dplyr::all_of("wflow_id")),
+                                 what = 'mean',
+                                 ...){
+  
+  #' Plot permutation importance for model covariates
+  #'
+  #' 
+  #' @param x table of model fits
+  #' @param wids str, the workflow(s) to operate upon, by default all of them
+  #' @param what str, the name of the metric to use
+  #' @return ggplot
+  lvls = rev(x$wflow_id)
+  v = model_fit_varimp(x, ...)
+  v = v |>
+    dplyr::select(dplyr::all_of(c("workflow_id","var","importance"))) |>
+    rlang::set_names(c("Workflow", "Covariate", "Importance")) |>
+    dplyr::mutate(Workflow = factor(Workflow, levels = lvls))
+    
+  ggplot2::ggplot(data = v,
+                  mapping = ggplot2::aes(x = Covariate,
+                                         y = Workflow,
+                                         fill = Importance)) +
+    ggplot2::geom_tile() +
+    ggplot2::labs(y = "Workflow", 
+                  x = "Covariate")
+}
+
+
+model_fit_varimp = function(x,
+                            wids = dplyr::pull(x, dplyr::all_of("wflow_id")),
+                            n = 5,
+                            arrange = c("none", "increasing", "decreasing")[1],
+                            ...){
+  
+  #' Compute permutation importance for model covariates
+  #'
+  #' This is adapted from Peter D Wilson's [fitMaxnet R package](https://github.com/peterbat1/fitMaxnet),
+  #' as done by [K Oliveira](https://github.com/kolive4/carcharodon/blob/cedeca9d1812fddadfec3aa1fee7cf0195e43553/functions/tidysdm_fxns.R#L470).
+  #' 
+  #'
+  #'
+  #' @export
+  #' @param x table of model fits
+  #' @param wids str, the workflow(s) to operate upon, by default all of them
+  #' @param n num, number of iterations
+  #' @param arrange char, one of "none" (default), "decreasing" or "increasing" to arrange
+  #'    the output order
+  #' @param ... other arguments for \code{\link[maxnet]{predict}} such
+  #'   as \code{clamp} and \code{type}
+  #' @return table of premutation importance scores (and raw values)
+
+  
+  do_pred = function(m,d, rtype, mtype){
+    if (mtype == "boost_tree"){
+      pred = predict(m, d,  type = rtype)
+    } else if (mtype == "rand_forest"){
+      pred = predict(m, d,  type = rtype)$predictions[,"presence"]
+    } else if (mtype == "logistic_reg"){
+      pred = predict(m, d,  type = rtype)
+    } else if (mtype %in% c("maxent", "maxnet")) {
+      pred = predict(m, d,  type = rtype)[,1, drop = TRUE]
+    } else {
+      stop("model type not known: ", mtype)
+    }
+    unname(pred)
+  }
+  
+  cnames = c("mean", "sd", "min", "q25", "med", "q75", "max")
+  
+  x |>
+    dplyr::filter(wflow_id %in% wids) |>
+    dplyr::rowwise() |>
+    dplyr::group_map(
+      function(row, key){
+        mtype = model_fit_spec(row)
+        vnames = model_fit_varnames(row)
+        resp = get_response_type(mtype)
+        model = row$.workflow[[1]] |>
+          workflows::extract_fit_engine()
+        y = row$splits[[1]] |>
+          rsample::training() |>
+          sf::st_drop_geometry() |>
+          dplyr::select(dplyr::all_of(vnames))
+        ny = nrow(y)
+        baseline = do_pred(model, y, resp, mtype)
+        r = sapply(vnames,
+                   function(varname){          # shuffle each variable n times
+                     orig_values = y[,varname, drop = TRUE]
+                     r = sapply(seq_len(n),
+                                function(iter){
+                                  index = sample(ny,ny)   # shuffle the variable
+                                  y[,varname] <- orig_values[index]
+                                  m = do_pred(model, y, resp, mtype)
+                                  cor(baseline,m)       # correlate to original
+                                })
+                     y[,varname] <- orig_values
+                     v = c(mean(r),sd(r), fivenum(r)) |>
+                       rlang::set_names(cnames)
+                     v
+                   }) |>
+          t() |>
+          dplyr::as_tibble(rownames = "var") |>
+          dplyr::mutate(workflow_id = row$wflow_id, .before = 1)
+        mean_data = sum(1-r$mean)
+        r = r |>
+          dplyr::mutate(importance = round((1-.data$mean)/mean_data,2), .after = 2)
+      } # group_map
+    ) |>
+    dplyr::bind_rows()
+}
+
+
+
 
 model_fit_varnames = function(x,
                               wid = dplyr::pull(x, dplyr::all_of("wflow_id"))[1]){

@@ -18,6 +18,22 @@ predict_table = function(wflow, newdata, type = "prob", threshold = 0.5, ...){
 }
 
 
+get_response_type = function(name){
+  
+  #' A little function to accept a model name and return the
+  #' appropriate value for the `type` argument to predict
+  #'
+  #' @param name str, the model specification name
+  #' @return str, the appropriate value for response type
+  switch(name,
+         "logistic_reg" = "response",
+         "rand_forest" = "response",
+         "boost_tree" = "response",
+         "maxnet" = "cloglog",
+         "maxent" = "cloglog",
+         stop("name not known: ", name))
+} 
+
 predict_stars = function(x, newdata, 
                          wids = dplyr::pull(x, dplyr::all_of("wflow_id")),
                          type = "prob", 
@@ -33,18 +49,6 @@ predict_stars = function(x, newdata,
   #' @param threshold num the aribitray threshold used to define the outcome
   #' @param ... other arguments for `predict.model_fit`
   #' @return a stars object
-  
-  # a little function to accept a model name and return the
-  # appropriate value for the `type` argument to predict
-  get_type_var = function(name){
-    switch(name,
-           "logistic_reg" = "response",
-           "rand_forest" = "response",
-           "boost_tree" = "response",
-           "maxnet" = "cloglog",
-           "maxent" = "cloglog",
-           stop("name not known: ", name))
-  } 
   
   lvls = c("presence", "background")
   d = names(stars::st_dimensions(newdata))
@@ -69,15 +73,15 @@ predict_stars = function(x, newdata,
                      if (mtype == "boost_tree")  {
                        pred = predict(model, 
                                  thismonth |> as.data.frame(add_coordinates = FALSE),
-                                 type = get_type_var(mtype))
+                                 type = get_response_type(mtype))
                        p = thismonth[1]
                        p[[1]][] <- pred
                      } else if (mtype == "rand_forest") {
-                       p = predict(thismonth, model, type = get_type_var(mtype))[1]
+                       p = predict(thismonth, model, type = get_response_type(mtype))[1]
                      } else if (mtype == "logistic_reg"){
-                       p = predict(thismonth, model, type = get_type_var(mtype))
+                       p = predict(thismonth, model, type = get_response_type(mtype))
                      } else if (mtype %in% c("maxent", "maxnet") ){
-                       p = predict(thismonth, model, type = get_type_var(mtype))
+                       p = predict(thismonth, model, type = get_response_type(mtype))
                      } else {
                        stop("model type not known: ", mtype)
                      }

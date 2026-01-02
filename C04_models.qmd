@@ -255,10 +255,10 @@ model_fit_roc_auc(model_fits)
 
 ### Variable importance
 
-Variable importance can tell us about the contribution each covariate variable makes toward the whole.  It doesn't compare between models, just within a given model.  Reading the heatmap below scans a given model's row.  For instance, `MLD` and `SST` seem to have equally high importance for `default_rf` (random forest) compared to the other covariates.
+Variable importance can tell us about the contribution each covariate variable makes toward the whole.  It doesn't compare between models, just within a given model.  Reading the heatmap below scans a given model's row.  For instance, `MLD` and `SST` seem to have high importance for `default_btree` (random forest) compared to the other covariates.
 
 ```{r model_fit_vip}
-model_fit_vip(model_fits)
+model_fit_varimp_plot(model_fits)
 ```
 
 ## Exploring a single model fit result
