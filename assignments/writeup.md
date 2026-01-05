@@ -1,6 +1,6 @@
 # Project Write-up
 
-A climate projection of a species for the Gulf of Maine.
+A foresighting analysis of a species for the Gulf of Maine. This can be built around the climate projection you've constructed through the coding exercises. It can also incorporate other forecasting approaches if you'd like to bring in something additional.
 
 Content
  - Sections
@@ -9,9 +9,9 @@ Content
    - Modeling: Go through your approach and results, including a projection to future climate conditions.
    - Implications: How does your prediction influence the decisions around this species that you discussed in the introduction? You can also discuss next steps or open questions.
  - Refer to the "Forecast Cards" questions we used to guide our discussions
-   - https://docs.google.com/spreadsheets/d/1gPwJF2XAKD9WftHAgRY9X_CXpn-S0gQFDZeF7yxdIGo/edit?gid=0#gid=0
+   - Link to be added after discussion takes place
  - Word count: Approximately 2,000
- - References: Include primary literature. Can also use news reports, etc.
+ - References: Must include primary literature. Aim for at least five primary literature references. Can also use news reports, etc. to supplement.
    
 Style
    - Consistent language. E.g. If you use first person, do so consistently. Use tense consistently.
