@@ -106,7 +106,7 @@ This schedule has built in flexibility. Changes will be noted.
 
 - Discussion: Where does our data come from?
 
-- Reading assignment for next time: [Brickman
+- Reading assignment for next time: Monday we have a panel with three early career scientists who work on forecasting. Each will give a presentation of their work. You assignment is to read these papers ahead of time and to ask at least one question during the question session. [Brickman
   2020](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Brickman.elementa.2020.20.00055.pdf)
 
 ## 4. Tuesday Jan 13
