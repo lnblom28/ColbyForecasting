@@ -232,6 +232,7 @@ Speaking of which, we provided `scientificname` with a default value - we chose 
 As you build your function, pause every so often and run the following to test things out.
 
 ```
-source("setup.R")
+source("sreadetup.R")
 obs = read_observations()
 ```
+
