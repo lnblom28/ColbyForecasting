@@ -110,7 +110,7 @@ This schedule has built in flexibility. Changes will be noted.
 
 - Lecture: Forecasting Methodologies
 
-- Discussion: Forecasting unintended consequences
+- Discussion: Data sources
 
 - R Tutorial: [Background
   Points](https://bigelowlab.github.io/ColbyForecasting/C02_background.html)
@@ -128,6 +128,8 @@ This schedule has built in flexibility. Changes will be noted.
 ## 5. Thursday Jan 15
 
 - Lecture: Algorithm Accountability
+
+- Discussion: Forecasting unintended consequences
 
 - R Tutorial:
   [Modeling](https://bigelowlab.github.io/ColbyForecasting/C04_models.html)
