@@ -180,10 +180,11 @@ in future decades.
 
 - Continuation of presentations.
 
-- Final project due
+- Final project due (Saturday Jan 31)
   - A ~2,000 word write-up of your Gulf of Maine projection. [Details
     can be found
     here](https://github.com/BigelowLab/ColbyForecasting/blob/main/assignments/writeup.md).
+
 
 ## **LEARNING OUTCOMES**
 
