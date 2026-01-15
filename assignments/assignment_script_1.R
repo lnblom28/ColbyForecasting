@@ -27,3 +27,4 @@ ggplot(data = x,
        title = "RCP4.5 2055 SST at buoy M01")
 
 ggsave("images/M01_SST.png")
+

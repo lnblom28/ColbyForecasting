@@ -49,7 +49,7 @@ dim_start
 Next we should examine the `basisOfRecord` variable to get an understanding of how these observations were made.
 
 ```{r basisOfRecord}
-obs |> count(basisOfRecord)
+
 ```
 
 If you are using a different species you may have different values for `basisOfRecord`.  Let's take a closer look at the complete records for one from each group.  

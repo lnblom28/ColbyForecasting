@@ -1,6 +1,6 @@
 
 read_observations = function(scientificname = "Phocoena phocoena",
-                             minimum_year = 1970, individual_count,
+                             minimum_year = 1970, individual_count = 10000, yearNA = "no", monthNA = "no", dateNA = "no",
                              ...){
   
   #' Read raw OBIS data and then filter it
@@ -24,7 +24,6 @@ read_observations = function(scientificname = "Phocoena phocoena",
   }
 
    # x = x |>
-    #  filter(!is.na(individualCount), !is.na(eventDate), !is.na(year))
     if(individual_count >= 1)
     {
       x = x |>
@@ -32,8 +31,24 @@ read_observations = function(scientificname = "Phocoena phocoena",
       
       x = x |>
         filter(!is.na(individualCount))
-      print("a")
     }
+    
+    if(yearNA == "yes")
+    {
+      x = x |>
+        filter(!is.na(year))
+    }
+    
+    if(monthNA == "yes")
+    {
+      x = x |>
+        filter(!is.na(month))}
+    
+    if(dateNA == "yes"){
+      x = x |>
+        filter(!is.na(eventDate))
+    }
+    
   
   return(x)
 }
