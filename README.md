@@ -135,7 +135,7 @@ This schedule has built in flexibility. Changes will be noted.
 - R Tutorial:
   [Modeling](https://bigelowlab.github.io/ColbyForecasting/C04_models.html)
 
-- Reading assignment for next time: TBD
+- Reading assignment for next time: [Pichler 2022](https://github.com/BigelowLab/ColbyForecasting/blob/main/reading/Pichler2022.pdf)
 
 ## Monday Jan 19
 
