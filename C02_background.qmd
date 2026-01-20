@@ -3,25 +3,25 @@ title: "Background"
 format: html
 ---
 
-> No choice is the wrong choice as long as you make a choice. The only wrong choice is choosing not to make one. ~ [Jake Abel](https://en.wikipedia.org/wiki/Jack_Abel)
+> No choice is the wrong choice as long as you make a choice. The only wrong choice is choosing not to make one. \~ [Jake Abel](https://en.wikipedia.org/wiki/Jack_Abel)
 
-Traditional ecological surveys are systematic, for a given species survey data sets tell us where the species is found and where it is absent.  Using an observational data set (like [OBIS](https://obis.org))  we only know where the species is found, which leaves us guessing about where they might not be found. This difference is what distinguishes a *presence-abscence* data set from a *presence-only* data set, and this difference guides the modeling process.
+Traditional ecological surveys are systematic, for a given species survey data sets tell us where the species is found and where it is absent. Using an observational data set (like [OBIS](https://obis.org)) we only know where the species is found, which leaves us guessing about where they might not be found. This difference is what distinguishes a *presence-abscence* data set from a *presence-only* data set, and this difference guides the modeling process.
 
-When we model species distributions we are trying to define the environments where we should expect to find a species as well as the environments we would not expect to find a species. With OBIS data we have in hand the locations of observations, and we can extract the environmental data at those locations.  To characterize the unoccupied environments we are going to have to sample what is called "background" (aka "background points" and "pseudo-absences".)
+When we model species distributions we are trying to define the environments where we should expect to find a species as well as the environments we would not expect to find a species. With OBIS data we have in hand the locations of observations, and we can extract the environmental data at those locations. To characterize the unoccupied environments we are going to have to sample what is called "background" (aka "background points" and "pseudo-absences".)
 
-We assume that we want the number of background points to be roughoy balanced with the number of observations. What balance means is open to interpretation, but if we have 100 observations then we would like to have 50 to 200 background points in order to be balanced.  One can spend a lot of time of time finding the most appropriate balance.
+We assume that we want the number of background points to be roughoy balanced with the number of observations. What balance means is open to interpretation, but if we have 100 observations then we would like to have 50 to 200 background points in order to be balanced. One can spend a lot of time of time finding the most appropriate balance.
 
-We want these background samples to roughly match the regional preferences of the observations; that is we want to avoid having observations that are mostly over Georges Bank while our background samples are primarily around the Bay of Fundy. We want there to be some reasonable proximity between occupied and unoccupied environments. 
+We want these background samples to roughly match the regional preferences of the observations; that is we want to avoid having observations that are mostly over Georges Bank while our background samples are primarily around the Bay of Fundy. We want there to be some reasonable proximity between occupied and unoccupied environments.
 
 Here we want to satisfy a couple of basic requirements...
 
-+ balance the number of observations and background points (whatever balance means),
+-   balance the number of observations and background points (whatever balance means),
 
-+ avoid selecting background points that coincide with observations,
+-   avoid selecting background points that coincide with observations,
 
-+ choose background points where we can measure the same environmental characteristics that we can measure for observations.
+-   choose background points where we can measure the same environmental characteristics that we can measure for observations.
 
-Keep in mind we will be glossing over important details; there is much more to investigate here, but *tempus fugit* and our course of study is brief.  At the end we want to have in hand a set of locations that can be a companion for the observations.
+Keep in mind we will be glossing over important details; there is much more to investigate here, but *tempus fugit* and our course of study is brief. At the end we want to have in hand a set of locations that can be a companion for the observations.
 
 # Setup
 
@@ -37,15 +37,15 @@ OK - load the data we need.
 
 ```{r load_obs_mask}
 coast = read_coastline()
-obs = read_observations(scientificname = "Mola mola")
+obs = read_observations(scientificname = "Phocoena phocoena")
 db = brickman_database() |>
   filter(scenario == "STATIC", var == "mask")
 mask = read_brickman(db)
 ```
 
-Let's start with a simple plot of the observations per month. We'll make an array of maps with one constructed per month.  We'll use the [ggplot2 plotting system](https://ggplot2.tidyverse.org/) which is a powerful system for layering components of a plot.
+Let's start with a simple plot of the observations per month. We'll make an array of maps with one constructed per month. We'll use the [ggplot2 plotting system](https://ggplot2.tidyverse.org/) which is a powerful system for layering components of a plot.
 
-We will want to add a notation to each plot showing the number of points that month.  To make that table we use the `count()` function from the [dplyr R package](https://dplyr.tidyverse.org/). We also found the best location to print the count (through trial and error) so we define that, too.
+We will want to add a notation to each plot showing the number of points that month. To make that table we use the `count()` function from the [dplyr R package](https://dplyr.tidyverse.org/). We also found the best location to print the count (through trial and error) so we define that, too.
 
 ```{r all_observations_count}
 LON0 = -67
@@ -54,7 +54,7 @@ all_counts = count(st_drop_geometry(obs), month) # counting is faster without sp
 all_counts
 ```
 
-Now we can construct the plot.  Note that layering of data, then the coast then the extra text.  Also, we use alpha (aka 'transparency' or 'opacity') blending to make the plotting symbols slightly transparent which reveals overlapping points nicely.  
+Now we can construct the plot. Note that layering of data, then the coast then the extra text. Also, we use alpha (aka 'transparency' or 'opacity') blending to make the plotting symbols slightly transparent which reveals overlapping points nicely.
 
 ```{r all_observations}
 ggplot() +
@@ -69,11 +69,11 @@ ggplot() +
   facet_wrap(~month)
 ```
 
-Some of those points are densely distributed depending upon the month.  In fact, it may be that we have multiple points in each raster cell in our Brickman data.  We have a function to help use reduce "thin" the observations so that we have just one observation per cell.
+Some of those points are densely distributed depending upon the month. In fact, it may be that we have multiple points in each raster cell in our Brickman data. We have a function to help use reduce "thin" the observations so that we have just one observation per cell.
 
 ## Thinning observations
 
-Thinning is the process we use to sub-sample observations so that they are more evenly sampled across the spatial domain. We do this to discourage accidental sampling bias. The [tidysdm package]() provides a nice function, `thin_by_cell()`, that "thins" by allowing only one observation per cell in the Brickman data.  We'll iterate through each month
+Thinning is the process we use to sub-sample observations so that they are more evenly sampled across the spatial domain. We do this to discourage accidental sampling bias. The [tidysdm package]() provides a nice function, `thin_by_cell()`, that "thins" by allowing only one observation per cell in the Brickman data. We'll iterate through each month
 
 ```{r thin_observations}
 thinned_obs = sapply(month.abb,
@@ -102,9 +102,9 @@ ggplot() +
 
 ## Weighted sampling
 
-We now have thinned the observations to just `r nrow(thinned_obs)` records compared to the original `r nrow(obs)` observations. So that get us to no more than 1 observation to cell.  But do we loose the importance of clustered observations?  Isn't meaningful ecologically that the species is found in clusters?  The answers to those are **yes** and **yes**.
+We now have thinned the observations to just `r nrow(thinned_obs)` records compared to the original `r nrow(obs)` observations. So that get us to no more than 1 observation to cell. But do we loose the importance of clustered observations? Isn't meaningful ecologically that the species is found in clusters? The answers to those are **yes** and **yes**.
 
-Uh oh, so how do we retain that clustering importance?  The answer is to build a sampling bias map using the original observations that influences where we sample.  Let's build a bias map by counting the number of observations in each cell - we'll use the original observations for the entire year (regardless of month.)
+Uh oh, so how do we retain that clustering importance? The answer is to build a sampling bias map using the original observations that influences where we sample. Let's build a bias map by counting the number of observations in each cell - we'll use the original observations for the entire year (regardless of month.)
 
 ```{r bias_map}
 bias_map = rasterize_point_density(obs, mask) # <-- note the original observations
@@ -115,15 +115,16 @@ ggplot() +
   geom_sf(data = coast, col = "orange") + 
   labs(x = "Longitude", y = "Latitude", title = "Bias map using all observations")
 ```
-Depending upon your distribution, the clustering may be more or less apparent.  For *Mola mola* it's dominated by a wide even spread with a few "peak" spots.
+
+Depending upon your distribution, the clustering may be more or less apparent. For *Mola mola* it's dominated by a wide even spread with a few "peak" spots.
 
 ## Randomly sample background points
 
-Now that we have a reasonable set of observation and a sampling bias map, we now need to choose points using those to represent the background.  The `sample_background()` function requires three input arguments: the set of observations, the raster array and the number of points desired.  We can also ask for the presence observations to be returned along with the background points to keep things tidy.  Since we are doing this by month, we'll modify the output by adding a column identifying the month.
+Now that we have a reasonable set of observation and a sampling bias map, we now need to choose points using those to represent the background. The `sample_background()` function requires three input arguments: the set of observations, the raster array and the number of points desired. We can also ask for the presence observations to be returned along with the background points to keep things tidy. Since we are doing this by month, we'll modify the output by adding a column identifying the month.
 
 #### But just how many background points?
 
-But how many background points should we get for each month? Should be try balance by month?  Or balance by taking the average for all months.  Let's do the latter, but it might be worth exploring that further.
+But how many background points should we get for each month? Should be try balance by month? Or balance by taking the average for all months. Let's do the latter, but it might be worth exploring that further.
 
 ```{r n_background_per_month}
 nback_avg = mean(all_counts$n) |>
@@ -131,7 +132,7 @@ nback_avg = mean(all_counts$n) |>
 nback_avg
 ```
 
-So, here we go.  We shall use the [`sapply` iterator](https://bigelowlab.github.io/handytandy/iterations.html) to step through each month. For each month we'll use the thinned observations and the annual bias map to sample for background. At the end we'll have a list of monthly tables which we'll bind into one giant table, and we'll refresh the month column to be a factor (of monthly groupings of course!)
+So, here we go. We shall use the [`sapply` iterator](https://bigelowlab.github.io/handytandy/iterations.html) to step through each month. For each month we'll use the thinned observations and the annual bias map to sample for background. At the end we'll have a list of monthly tables which we'll bind into one giant table, and we'll refresh the month column to be a factor (of monthly groupings of course!)
 
 ```{r sample_background}
 obsbkg = sapply(month.abb,
@@ -170,7 +171,7 @@ ggplot() +
 
 ```
 
-These would be the data locations we feed into the model.  So is that reasonable solution? At first glance it seems to be, so we'll choose this background sampling approach; thinning with biased sampling. We can't know if another approach might be better until we actually start modeling.
+These would be the data locations we feed into the model. So is that reasonable solution? At first glance it seems to be, so we'll choose this background sampling approach; thinning with biased sampling. We can't know if another approach might be better until we actually start modeling.
 
 Let's save this.
 
@@ -178,29 +179,28 @@ Let's save this.
 write_model_input(obsbkg, scientificname = "Mola mola")
 ```
 
-Note that there is a function for reading model input files, too. 
+Note that there is a function for reading model input files, too.
 
 ```{r read_model_input}
 x = read_model_input(scientificname = "Mola mola")
 ```
 
-
 # Recap
 
-We have prepared what we call "model inputs", in particular for *Mola mola*, by thinning observations and selecting background points.  There are lots of other approaches to creating the model input, but for the sake of learning we'll stick with this approach.  We developed a function that will produce our model inputs for a given month, and saved them to disk.
+We have prepared what we call "model inputs", in particular for *Mola mola*, by thinning observations and selecting background points. There are lots of other approaches to creating the model input, but for the sake of learning we'll stick with this approach. We developed a function that will produce our model inputs for a given month, and saved them to disk.
 
 # Coding Assignment
 
 ::: {.callout-note appearance="simple"}
-Use the menu option File > New File > R Script to create a blank file. Save the file (even though it is empty) in the “assignment” directory as “assignment_script_2.R”. Use this file to build a script that meets the following challenge. Note that the existing file, “assignment_script_0.R” is already there as an example.
+Use the menu option File \> New File \> R Script to create a blank file. Save the file (even though it is empty) in the “assignment” directory as “assignment_script_2.R”. Use this file to build a script that meets the following challenge. Note that the existing file, “assignment_script_0.R” is already there as an example.
 
-For each month select at random one presence and one background point (so, that will be 2 x 12 = 24 points!) from your model input data.  Then select three (3) variables in the Brickman present monthly data set, and build a single table that has the three variables for the 24 points.  This is **very similar** to the [C00 coding chapter homework](https://bigelowlab.github.io/ColbyForecasting/C00_coding.html#coding-assignment).
+For each month select at random one presence and one background point (so, that will be 2 x 12 = 24 points!) from your model input data. Then select three (3) variables in the Brickman present monthly data set, and build a single table that has the three variables for the 24 points. This is **very similar** to the [C00 coding chapter homework](https://bigelowlab.github.io/ColbyForecasting/C00_coding.html#coding-assignment).
 
-Hint!  Check out [iterating over grouped tables](https://bigelowlab.github.io/handytandy/iterations.html#groups-in-a-table) and the [`slice_sample` function](https://dplyr.tidyverse.org/reference/slice.html). 
+Hint! Check out [iterating over grouped tables](https://bigelowlab.github.io/handytandy/iterations.html#groups-in-a-table) and the [`slice_sample` function](https://dplyr.tidyverse.org/reference/slice.html).
 
-Here's what our table looks like for the *Mola mola* species.  
+Here's what our table looks like for the *Mola mola* species.
 
-```
+```         
 Simple feature collection with 24 features and 7 fields
 Geometry type: POINT
 Dimension:     XY
@@ -222,7 +222,4 @@ Geodetic CRS:  WGS 84
 # ℹ 14 more rows
 # ℹ Use `print(n = ...)` to see more rows
 ```
-
 :::
-
-
