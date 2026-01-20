@@ -145,6 +145,8 @@ Day](https://en.wikipedia.org/wiki/Martin_Luther_King_Jr._Day)
 
 ## 6. Tuesday Jan 20
 
+- Lecture: Machine Learning Types
+
 - R Tutorial:
   [Predicting](https://bigelowlab.github.io/ColbyForecasting/C05_prediction.html)
 
