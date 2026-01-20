@@ -25,7 +25,7 @@ Keep in mind we will be glossing over important details; there is much more to i
 
 # Setup
 
-As always, we start by running our setup function. Start RStudio/R, and relaod your project with the menu `File > Recent Projects`.
+As always, we start by running our setup function. Start RStudio/R, and reload your project with the menu `File > Recent Projects`.
 
 ```{r setup}
 source("setup.R")
@@ -78,7 +78,9 @@ Thinning is the process we use to sub-sample observations so that they are more 
 ```{r thin_observations}
 thinned_obs = sapply(month.abb,
                function(mon){ 
-                 thin_by_cell(obs |> filter(month == mon), mask)
+                 temp_x = obs |> filter(month == mon)
+                 if(nrow(temp_x) == 0) return(NULL)
+                 thin_by_cell(temp_x, mask)
                }, simplify = FALSE) |>
   dplyr::bind_rows() 
 
@@ -137,7 +139,9 @@ So, here we go. We shall use the [`sapply` iterator](https://bigelowlab.github.i
 ```{r sample_background}
 obsbkg = sapply(month.abb,
     function(mon){ 
-      sample_background(thinned_obs |> filter(month == mon), # <- just this month
+      temp_x = thinned_obs |> filter(month == mon)
+      if (nrow(temp_x) == 0) return(NULL)
+      sample_background(temp_x, # <- just this month
                        bias_map,
                        method = "bias",  # <-- it needs to know it's a bias map
                        return_pres = TRUE, # <-- give me the obs back, too

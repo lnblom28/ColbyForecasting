@@ -5,6 +5,7 @@ format: html
 
 # Background
 
+
 Coding is the practice of writing instructions for computers to follow; computers aren't clever by themselves - they need to be told what to do.  Most coding is text-based; people writing coding instructions into simple text documents.  But some coding is [graphical or visual](https://en.wikipedia.org/wiki/Visual_programming_language). We shall be using text-based coding.  We are going to use a free and open source general programming language called R. [R programming language](https://www.r-project.org/) has its roots in statistics and science, but it really can be used for anything.
 
 In the early days, coding was pretty barebones - all one needed was a text editor and access to the programming language - no frills there, no pretty images, no buttons to push, just typing.  As time passed, volunteers added niceties to the text editor, like visualizing plots of data, buttons to save files, colorized text for the typed code, and other bells and whistles. These editors became know as graphical user interfaces (GUI for short.) GUIs keep getting easier and easier for people to use.  We will use the GUI known as [RStudio](https://posit.co/). It's best to think of GUIs as wrappers around the core programming language; they are really nice and pretty, but they can't do math. The programming language itself (which does do math!), evolved only as it needed to to fix bugs and make general improvements.
