@@ -1,0 +1,110 @@
+---
+title: "Assignment 3"
+output: github_document
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+source("/home/lnblom28/ColbyForecasting/setup.R")
+coast = read_coastline()
+obs = read_observations(scientificname = "Phocoena phocoena")
+db = brickman_database() |>
+  filter(scenario == "STATIC", var == "mask")
+mask = read_brickman(db)
+```
+
+## Read the Secondary Species
+
+In order to save the species into a variable, it must be downloaded first. Then it saves the information into the variable mackerel.
+
+```{r read_data, include=TRUE}
+mackerel = fetch_obis(scientificname = "Scomber scombrus")
+```
+
+## Filter the data
+
+We can use the "read_observation()" function to filter out the NA's and the information that is not needed. Then it will give a summary, to make sure the NA's have been taken out for event year, individual count, month, and year.
+
+```{r filter, include=TRUE}
+mackerel = read_observations(scientificname = "Scomber scombrus")
+summary(mackerel)
+```
+
+## Creating Background and Presence Data
+
+Using the code from "C02_background.qmd", this code creates background and presence data and stores it in a readable data file for the next task.
+
+```{r background_presence, include=TRUE, warning=FALSE}
+
+## Matching the covariates with singular background and present data
+
+#all observations
+LON0 = -67
+LAT0 = 46
+all_counts = count(st_drop_geometry(mackerel), month) # counting is faster without spatial baggage
+all_counts
+```
+
+## Thinning and Bias
+Thinning the data and excluding bias from the data.
+
+```{r thinning_and_bias, warning=FALSE}
+#thinning observations
+
+thinned_obs = sapply(month.abb,
+               function(mon){ 
+                 thin_by_cell(obs |> filter(month == mon), mask)
+               }, simplify = FALSE) |>
+  dplyr::bind_rows() 
+
+# another count
+thinned_counts = count(st_drop_geometry(thinned_obs), month)
+
+
+#excluding bias
+bias_map = rasterize_point_density(obs, mask) # <-- note the original
+
+
+#balancing background months
+nback_avg = mean(all_counts$n) |>
+  round()
+```
+
+## Orders the months
+Puts the months in order and puts them into a table
+
+```{r months_ordering, warning=FALSE}
+obsbkg = sapply(month.abb,
+    function(mon){ 
+      sample_background(thinned_obs |> filter(month == mon), # <- just this month
+                       bias_map,
+                       method = "bias",  # <-- it needs to know it's a bias map
+                       return_pres = TRUE, # <-- give me the obs back, too
+                       n = nback_avg) |>   # <-- how many points
+        mutate(month = mon, .before = 1)
+    }, simplify = FALSE) |>
+  bind_rows() |>
+  mutate(month = factor(month, levels = month.abb))
+```
+
+## Plots background and presence on map
+This plots the background and presence into 12 maps with each month.
+```{r background_and_presence}
+ggplot() +
+  geom_sf(data = obsbkg, 
+          mapping = aes(col = class),
+          alpha =  0.4, shape = "circle small", size = 1) +
+  geom_sf(data = coast, col = "orange")  + 
+  labs(x = "Longitude", y = "Latitude", title = "All") +   
+  theme_bw() +  # <- make a simple white background
+  scale_fill_okabe_ito() +  # <-- colorblind friendly for N Record
+  facet_wrap(~month)
+
+
+#then save the file
+write_model_input(obsbkg, scientificname = "Scomber scombrus")
+
+```
+
+
+
