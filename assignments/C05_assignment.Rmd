@@ -1,0 +1,174 @@
+---
+title: "C05_assignemtnt"
+output: github_document
+---
+
+
+# Setup
+
+Setting up R for our project. 
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+source("/home/lnblom28/ColbyForecasting/setup.R")
+```
+
+# Load the Brickman data
+
+Loading the brickman data to forecast for the present with nowcast.
+
+```{r load_covar}
+cfg = read_configuration(scientificname = "Scomber scombrus",
+                         version = "v1", 
+                         path = data_path("models"))
+db = brickman_database()
+present_conditions = read_brickman(db |> filter(scenario == "PRESENT", 
+                                                interval == "mon"),
+                       add = c("depth", "month")) |>
+  select(all_of(cfg$keep_vars))
+```
+
+# Load the workflow
+
+We will read in the file that we saved last time.
+
+```{r load_workflow}
+model_fits = read_model_fit(filename = "Scomber_scombrus-v1-model_fits")
+model_fits
+```
+
+
+# Make a prediction
+
+We will create a nowcast variable which will make predictions of what is happening now.
+
+## Nowcast
+
+This creates the actual variable and takes the observations and does the calculations.
+
+```{r nowcast}
+nowcast = predict_stars(model_fits, present_conditions)
+nowcast
+```
+Now we will plot on a map of what is calculated.
+
+```{r plot_nowcast_maxent, warning = FALSE}
+plot_prediction(nowcast['default_rf'])
+```
+
+This plots a abscence/present map with the threshold being 0.5. (the default)
+
+```{r plot_class_labels, warning = FALSE}
+pa_nowcast = threshold_prediction(nowcast, threshold = 0.2)
+plot_prediction(pa_nowcast['default_rf'])
+```
+
+## Forecast
+
+Now we will forcast using RCP85, for both 2055 and 2075.  We loa the parameters to make the predications, which will be plotted later.
+
+```{r load_2075_RCP85, warning = FALSE}
+covars_rcp85_2075 = read_brickman(db |> filter(scenario == "RCP85", 
+                                               year == 2075, 
+                                               interval == "mon"),
+                                  add = c("depth", "month")) |>
+  select(all_of(cfg$keep_vars))
+
+covars_rcp85_2055 = read_brickman(db |> filter(scenario == "RCP85", 
+                                               year == 2055, 
+                                               interval == "mon"),
+                                  add = c("depth", "month")) |>
+  select(all_of(cfg$keep_vars))
+```
+
+```{r forecast}
+forecast_2075_RCP85 = predict_stars(model_fits, covars_rcp85_2075)
+forecast_2075_RCP85
+
+forecast_2055_RCP85 = predict_stars(model_fits, covars_rcp85_2055)
+forecast_2055_RCP85
+```
+Plot the points in a map
+
+```{r plot_forecast, warning = FALSE}
+plot_prediction(forecast_2075_RCP85['default_rf'])
+plot_prediction(forecast_2055_RCP85['default_rf'])
+```
+
+We will now do it for RCP45.
+```{r load_2075_RCP85, warning = FALSE}
+covars_rcp45_2075 = read_brickman(db |> filter(scenario == "RCP45", 
+                                               year == 2075, 
+                                               interval == "mon"),
+                                  add = c("depth", "month")) |>
+  select(all_of(cfg$keep_vars))
+
+covars_rcp45_2055 = read_brickman(db |> filter(scenario == "RCP45", 
+                                               year == 2055, 
+                                               interval == "mon"),
+                                  add = c("depth", "month")) |>
+  select(all_of(cfg$keep_vars))
+```
+
+```{r forecast}
+forecast_2075_RCP45 = predict_stars(model_fits, covars_rcp45_2075)
+forecast_2075_RCP45
+
+forecast_2055_RCP45 = predict_stars(model_fits, covars_rcp45_2055)
+forecast_2055_RCP45
+```
+
+```{r plot_forecast, warning = FALSE}
+plot_prediction(forecast_2075_RCP45['default_rf'])
+plot_prediction(forecast_2055_RCP45['default_rf'])
+```
+:::{.callout-note}
+Don't forget that [there are other ways](https://github.com/BigelowLab/ColbyForecasting/wiki/Spatial) to plot array based spatial data.
+:::
+
+## Save the predictions
+
+It's easy to save the predictions (and read then back with `read_prediction()`).
+
+```{r save_pred}
+# make sure the output directory exists
+path = make_path("predictions")
+
+write_prediction(nowcast,
+                 scientificname = cfg$scientificname,
+                 version = cfg$version,
+                 year = "CURRENT",
+                 scenario = "CURRENT")
+write_prediction(forecast_2075_RCP85,
+                 scientificname = cfg$scientificname,
+                 version = cfg$version,
+                 year = "2075",
+                 scenario = "RCP85")
+write_prediction(forecast_2055_RCP85,
+                 scientificname = cfg$scientificname,
+                 version = cfg$version,
+                 year = "2055",
+                 scenario = "RCP85")
+write_prediction(forecast_2075_RCP45,
+                 scientificname = cfg$scientificname,
+                 version = cfg$version,
+                 year = "2075",
+                 scenario = "RCP45")
+write_prediction(forecast_2055_RCP45,
+                 scientificname = cfg$scientificname,
+                 version = cfg$version,
+                 year = "2055",
+                 scenario = "RCP45")
+```
+
+# Recap
+
+We made both a nowcast and a predictions using previously saved model fits. Contrary to Yogi Berra's claim, it's actually pretty easy to predict the future.  Perhaps more challenging is to interpret the prediction.  We bundled these together to make time series plots, and we saved the predicted values.
+
+# Coding Assignment
+
+::: {.callout-note appearance="simple"}
+For each each climate scenario create a monthly forecast (so that's three time periods: PRESENT, 2055 and 2075 and three scenarios CURRENT, RCP45, RCP85) and save each to in your `predictions` directory.  In the end you should have 5 files saved (one for PRESENT and two each for 2055 and 2075).
+
+Do the same for your second species.  Ohhh, perhaps this a good time for another R markdown or R script to keep it all straight?
+:::

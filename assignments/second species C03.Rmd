@@ -51,16 +51,9 @@ Thinning the data and excluding bias from the data.
 ```{r thinning_and_bias, warning=FALSE}
 #thinning observations
 
-#thinned_obs = sapply(month.abb,
-#               function(mon){ 
-#                 thin_by_cell(obs |> filter(month == mon), mask)
-#               }, simplify = FALSE) |>
-#  dplyr::bind_rows() 
 thinned_obs = sapply(month.abb,
                function(mon){ 
-                 temp_x = obs |> filter(month == mon)
-                 if(nrow(temp_x) == 0) return(NULL)
-                 thin_by_cell(temp_x, mask)
+                 thin_by_cell(obs |> filter(month == mon), mask)
                }, simplify = FALSE) |>
   dplyr::bind_rows() 
 
@@ -81,23 +74,9 @@ nback_avg = mean(all_counts$n) |>
 Puts the months in order and puts them into a table
 
 ```{r months_ordering, warning=FALSE}
-#obsbkg = sapply(month.abb,
-#    function(mon){ 
-#      sample_background(thinned_obs |> filter(month == mon), # <- just this month
-#                       bias_map,
-#                       method = "bias",  # <-- it needs to know it's a bias map
-#                       return_pres = TRUE, # <-- give me the obs back, too
-#                       n = nback_avg) |>   # <-- how many points
-#        mutate(month = mon, .before = 1)
-#    }, simplify = FALSE) |>
-#  bind_rows() |>
-#  mutate(month = factor(month, levels = month.abb))
-
 obsbkg = sapply(month.abb,
     function(mon){ 
-      temp_x = thinned_obs |> filter(month == mon)
-      if (nrow(temp_x) == 0) return(NULL)
-      sample_background(temp_x, # <- just this month
+      sample_background(thinned_obs |> filter(month == mon), # <- just this month
                        bias_map,
                        method = "bias",  # <-- it needs to know it's a bias map
                        return_pres = TRUE, # <-- give me the obs back, too
@@ -106,7 +85,6 @@ obsbkg = sapply(month.abb,
     }, simplify = FALSE) |>
   bind_rows() |>
   mutate(month = factor(month, levels = month.abb))
-obsbkg 
 ```
 
 ## Plots background and presence on map

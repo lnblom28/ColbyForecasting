@@ -1,0 +1,281 @@
+---
+title: "C04_assignment_secondSpecies"
+output: github_document
+---
+
+
+## Setup 
+Setting up the R code to make sure necessary packages are loaded into the project. 
+
+```{r setup}
+source("/home/lnblom28/ColbyForecasting/setup.R")
+```
+
+## Load dataing data
+
+We will load the data that we saved before, when splitting our information into background and presence. In my case, we are using the version 1 file of Phocoena phocoena. We also make months as numbers, while also making the depth and stress at bottom on a log scale to more easily understand the data.
+
+
+```{r load_data}
+cfg = read_configuration(scientificname = "Scomber scombrus", version = "v1")
+model_input = read_model_input(scientificname = "Scomber scombrus", 
+                               version = "v1",
+                               log_me = c("depth", "Xbtm")) |>
+  dplyr::mutate(month = month_as_number(.data$month)) |>
+  select(all_of(c("class", cfg$keep)))
+```
+
+## Splitting the data into training and testing
+
+We set 80% of the data to train the models, while the 20% for used later. This code splits the data.
+
+## Initial split into training and testing groups
+
+```{r initial_split}
+model_input_split = spatial_initial_split(model_input, 
+                        prop = 1 / 5,     # 20% for testing
+                        strategy = spatial_block_cv) # see ?spatial_block_cv
+model_input_split
+```
+
+There are 4 times more training points compared to the testing points.
+
+```{r initial_split_plot}
+autoplot(model_input_split)
+```
+
+## The training groups get split into regions
+
+We take the training data and make it spatial.
+
+```{r cv_training}
+tr_data = training(model_input_split)
+cv_tr_data <- spatial_block_cv(tr_data,
+  v = 5,     
+  cellsize = grid_cellsize(model_input),
+  offset = grid_offset(model_input) + 0.00001
+)
+autoplot(cv_tr_data)
+```
+
+
+# Building a recipe
+
+This is buliding a recipe for the models. This shows what data the models will use to execute what we want it to.
+
+
+```{r recipe}
+one_row_of_training_data = dplyr::slice(tr_data,1)
+rec = recipe(one_row_of_training_data, formula = class ~ .)
+rec
+```
+This shows the number of variables that the models will be using. The coordinates are in the coords rather than the predictor. The line below shows a more in-depth result of the recipe.
+
+```{r recipe_summary}
+summary(rec)
+```
+
+Each input variable is in the categories of predictor, coordinates and outcome.
+
+# Creating a workflow for the model
+
+The workflows include our desired models that we will use.
+
+These four models:
+
+ + glm: [generalized linear model](https://en.wikipedia.org/wiki/Generalized_linear_model)
+ 
+ + rf: [random forest](https://en.wikipedia.org/wiki/Random_forest)
+ 
+ + gbm: [boosted regression trees](http://download.nust.na/pub3/cran/web/packages/dismo/vignettes/brt.pdf)
+ 
+ + maxent: [maximum entropy](https://en.wikipedia.org/wiki/Principle_of_maximum_entropy)
+ 
+The hyperparameters are tuned here.
+```{r make_workflow}
+wflow = workflow_set(
+  
+  preproc = list(default = rec), # not much happening in our preprocessor
+  
+  models = list(                 # but we have 4 models to add
+    
+      # very simple - nothing to tune
+      glm = logistic_reg(
+          mode = "classification") |>
+        set_engine("glm"),
+      
+      # two knobs to tune
+      rf = rand_forest(
+          mtry = tune(),
+          trees = tune(),
+          mode = "classification") |>
+        set_engine("ranger", 
+                   importance = "impurity"),
+      
+      # so many things to tune!
+      btree = boost_tree(
+          mtry = tune(), 
+          trees = tune(), 
+          tree_depth = tune(), 
+          learn_rate = tune(), 
+          loss_reduction = tune(), 
+          stop_iter = tune(),
+          mode = "classification") |>
+        set_engine("xgboost"),
+    
+      # just two again
+      maxent = maxent(
+          feature_classes = tune(),
+          regularization_multiplier = tune(),
+          mode = "classification") |>
+        set_engine("maxnet")
+  )
+)
+wflow
+```
+
+
+## Choosing metrics that will decide which model is the best
+
+We will use four metrics. The authors,
+[tidysdm R package](https://evolecolgroup.github.io/tidysdm/) have a preferred set: [Boyce Continuous Index](https://evolecolgroup.github.io/tidysdm/reference/boyce_cont.html), [True Skill Statistic](https://evolecolgroup.github.io/tidysdm/reference/tss_max.html) and [Area Under the Receiver Operator Curve](https://evolecolgroup.github.io/tidysdm/reference/prob_metrics_sf.html). We will also use accuracy along with the default set.
+
+```{r metrics}
+metrics = sdm_metric_set(yardstick::accuracy)
+metrics
+```
+
+
+
+
+## Hyperparameters  
+
+
+The parameters help set up the model to see what is needed to do the calculations.
+
+The parameters get varied to se them where it is just right.
+
+### Iteration for finding parameter sets.
+
+We will send minions to do what we need to set up for our models and predictions.
+
+
+
+```{r fit, warning = FALSE}
+wflow <- wflow |>
+  workflow_map("tune_grid",
+    resamples = cv_tr_data, 
+    grid = 3,
+    metrics = metrics, 
+    verbose = TRUE)
+```
+Plot of each of the outputs
+```{r plot_wflow}
+autoplot(wflow)
+```
+general linearized models only have one parameter, that is why there is only one here.
+
+
+### Choosing what the best hyperparameters is for each model
+
+We will save the best hyperparameter for each of the models into a file.
+
+```{r select_best}
+model_fits = workflowset_selectomatic(wflow, model_input_split,
+                                  filename = "Scomber_scombrus-v1-model_fits",
+                                  path = data_path("models"))
+model_fits
+```
+We get out 4 models. 
+
+
+## Looking at the model fit results
+
+We can look at the representations of the fitted models.
+
+### A table of metrics
+
+We can look at the summary.
+```{r model_fit_metrics}
+model_fit_metrics(model_fits)
+```
+
+### Confusion matrices and accuracy
+
+We can plot the confusion matricies as well as the accuracy.
+
+```{r model_fit_confmat}
+model_fit_confmat(model_fits)
+```
+### ROC/AUC
+
+We can collate plots of Receiver Operator Curves (ROC) from which the Area Under the Curve (AUC) is computed.
+
+```{r model_fit_roc_auc}
+model_fit_roc_auc(model_fits)
+```
+
+### Variable importance
+
+Variable importance shows how important each variable is to contributing to the whole.
+
+```{r model_fit_vip}
+model_fit_varimp_plot(model_fits)
+```
+
+## Looking at a single model fit result
+
+Looking at one of the models.
+
+```{r random_forest}
+rf = model_fits |>
+  filter(wflow_id == "default_rf")
+rf
+```
+
+#### `splits`
+
+The allocation of the training and testing locations.
+
+```{r rf_splits}
+autoplot(rf$splits[[1]])
+```
+
+#### `.metrics`
+
+Metrics associated with the best hyperparameters.
+
+```{r rf_metrics}
+rf$.metrics[[1]]
+```
+
+#### `.predictions`
+
+Testing data predictions are listed here.
+
+```{r rf_preds}
+rf$.predictions[[1]]
+```
+
+#### `.workflow`
+
+The tuned hyperparameters as well as the fitted values are shown in the workflow.
+
+```{r rf_workflow}
+rf$.workflow[[1]]
+```
+
+
+
+### Partial dependence plot
+
+This reflects the relative controbution of the variables. This shows relative distribution and influence of the variables.
+```{r pd_plot}
+model_fit_pdp(model_fits, wid = "default_btree", title = "Boosted Tree")
+```
+
+# Recap
+
+We built 4 models and saved it into a workflow, and into a file, so we can use it later for our predictions.
+
+
