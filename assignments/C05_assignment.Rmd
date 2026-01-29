@@ -67,7 +67,7 @@ plot_prediction(pa_nowcast['default_rf'])
 
 Now we will forcast using RCP85, for both 2055 and 2075.  We loa the parameters to make the predications, which will be plotted later.
 
-```{r load_2075_RCP85, warning = FALSE}
+```{r load_RCP85, warning = FALSE}
 covars_rcp85_2075 = read_brickman(db |> filter(scenario == "RCP85", 
                                                year == 2075, 
                                                interval == "mon"),
@@ -96,7 +96,7 @@ plot_prediction(forecast_2055_RCP85['default_rf'])
 ```
 
 We will now do it for RCP45.
-```{r load_2075_RCP85, warning = FALSE}
+```{r load_RCP45, warning = FALSE}
 covars_rcp45_2075 = read_brickman(db |> filter(scenario == "RCP45", 
                                                year == 2075, 
                                                interval == "mon"),
@@ -110,7 +110,7 @@ covars_rcp45_2055 = read_brickman(db |> filter(scenario == "RCP45",
   select(all_of(cfg$keep_vars))
 ```
 
-```{r forecast}
+```{r forecast_RCP45}
 forecast_2075_RCP45 = predict_stars(model_fits, covars_rcp45_2075)
 forecast_2075_RCP45
 
@@ -118,7 +118,7 @@ forecast_2055_RCP45 = predict_stars(model_fits, covars_rcp45_2055)
 forecast_2055_RCP45
 ```
 
-```{r plot_forecast, warning = FALSE}
+```{r plot_forecast_RCP45, warning = FALSE}
 plot_prediction(forecast_2075_RCP45['default_rf'])
 plot_prediction(forecast_2055_RCP45['default_rf'])
 ```
